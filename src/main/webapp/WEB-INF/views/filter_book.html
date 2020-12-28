@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        #filter{
+            position: absolute;
+            left: 50%;
+            top: 40%;
+            transform: translate(-50%,-50%);
+            width: auto;
+            height: 40px;
+            margin: 20px;
+        }
+
+        #cancel{
+            position: relative;
+            left: 50%;
+            top: 70%;
+            transform: translate(-40%,-10%);
+            width: auto;
+            height: 40px;
+            margin: 20px;
+        }
+        H1{
+            position: absolute;
+            left: 50%;
+            top: 25%;
+            transform: translate(-50%,-50%);
+            font-family: "Times New Roman";
+        }
+        #books{
+            width: 50%;
+            border-collapse: collapse;
+        }
+
+        table{
+            margin: 25px;
+        }
+        th{
+            text-align: left;
+        }
+        th,td{
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+    <title>Filter books</title>
+    <H1>Bookshelf filter</H1>
+</head>
+<body>
+<div id="filter">
+    <form method="get" th:action="@{/filter/data}">
+        <table>
+            <tr>
+                <td>
+                    <input type="text" placeholder=" author" th:name="author">
+                </td>
+                <td>
+                    <input type="text" placeholder=" title" th:name="title">
+                </td>
+                <td>
+                    <input type="text" placeholder=" size (pages)" th:name="size">
+                </td>
+                <td>
+                    <input type="submit" value="remove">
+                </td>
+            </tr>
+        </table>
+    </form>
+    <table id="books">
+        <tr>
+            <th>id</th>
+            <th>author</th>
+            <th>title</th>
+            <th>size</th>
+        </tr>
+        <tr th:each="book : ${bookList}">
+            <td th:text="${book.id}"></td>
+            <td th:text="${book.autor}"></td>
+            <td th:text="${book.title}"></td>
+            <td th:text="${book.size}"></td>
+        </tr>
+    </table>
+    <form id="cancel" method="get" th:action="@{/filter/books}">
+        <input type="submit" value="Cancel">
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #begin{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            height: 150px;
+
+            transform: translate(-50%, -50%);
+        }
+        .login_item{
+            margin-bottom: 10px;
+        }
+        h1{
+            position: absolute;
+           left: 50%;
+            top: 30%;
+           transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+<h1>Login-Page</h1>
+<div id="begin">
+    <!--/*@thymesVar id="loginForm" type=""*/-->
+    <form method ="post" th:action="@{/index/auth}" th:object="${loginForm}">
+
+        <input class="login_item" type="text" placeholder="enter username" th:field="*{username}">
+        <p th:if="${#fields.hasErrors('username')}">Login not found</p>
+        <br>
+        <input class="login_item" type="password" placeholder="password" th:field="*{password}">
+        <p th:if="${#fields.hasErrors('password')}">Password is not correct</p>
+        <br>
+        <input class="login_item" type="submit" value="login">
+        <br>
+    </form>
+</div>
+
+</body>
+</html>

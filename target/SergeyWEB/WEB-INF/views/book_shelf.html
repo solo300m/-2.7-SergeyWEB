@@ -1,0 +1,158 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My book shelf</title>
+    <style>
+        #root_container{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #filter{
+            position: absolute;
+            left: 50%;
+            top: 80%;
+            transform: translate(-120%,275%);
+            width: auto;
+            height: 40px;
+            margin: 20px;
+        }
+        #filter_ops{
+            position: absolute;
+            left: 50%;
+            top: 80%;
+            transform: translate(-0%,300%);
+            width: auto;
+            height: 40px;
+            margin: 10px;
+        }
+        #filter_out{
+            position: absolute;
+            left: 50%;
+            top: 80%;
+            transform: translate(80%,300%);
+            width: auto;
+            height: 40px;
+            margin: 10px;
+        }
+        #books{
+            width: 50%;
+            border-collapse: collapse;
+        }
+        H1{
+            position: absolute;
+            left: 50%;
+            top: 15%;
+            transform: translate(-40%,-250%);
+            font-family: "Times New Roman";
+        }
+
+        table{
+            margin: 25px;
+        }
+        th{
+            text-align: left;
+        }
+        th,td{
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+    <H1>
+        Bookshelf
+    </H1>
+</head>
+<body>
+<div id="root_container">
+    <form method="post" th:action="@{/books/save}" th:object="${book}">
+        <table>
+            <tr>
+                <td>
+                    <input type="text" placeholder="author" th:field="*{autor}">
+                    <!--                        <input type="text" placeholder="author" th:field="*{author}">-->
+                    <p th:if="${#fields.hasErrors()}">field value do not bi Null</p>
+                </td>
+                <td>
+                    <input type="text" placeholder="book_title" th:field="*{title}">
+                    <p th:if="${#fields.hasErrors()}">field value do not bi Null</p>
+                </td>
+                <td>
+                    <input type="text" placeholder="size (pages)" th:field="*{size}">
+                    <p th:if="${#fields.hasErrors()}">field value must bi digit and less than 4 sings</p>
+                </td>
+                <td>
+                    <input type="submit" placeholder="save">
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    <form method="post" th:action="@{/books/remove}" th:object="${bookIdToRemove}">
+        <table>
+            <tr>
+                <td>
+                    <input type="text" placeholder="id number" th:field="*{id}">
+                    <!--                        th:field="*{book.id}" th:field="*{id}" th:name="bookIdToRemove"-->
+                </td>
+                <td>
+                    <input type="submit" value="remove">
+                </td>
+                <td th:if="${#fields.hasErrors()}">
+                    <p>Wrong id or nod found</p>
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    <h2>Uploading a file to the server</h2>
+    <form method="post" th:action="@{/books/uploadFile}" enctype="multipart/form-data">
+        <table>
+            <tr>
+                <td>
+                    <input type="file" name="file"/>
+                </td>
+                <td>
+                    <input type="submit" value="Upload">
+                </td>
+            </tr>
+        </table>
+    </form>
+    <h2>Uploading a file from the server to the project</h2>
+    <form method="post" th:action="@{/books/inloadFile}" enctype="multipart/form-data">
+        <table>
+            <tr>
+                <td>
+                    <input type="file" name="file"/>
+                </td>
+                <td>
+                    <input type="submit" value="Inload">
+                </td>
+            </tr>
+        </table>
+    </form>
+    <table id="books">
+        <tr>
+            <th>id</th>
+            <th>author</th>
+            <th>title</th>
+            <th>size</th>
+        </tr>
+        <tr th:each="book : ${bookList}">
+            <td th:text="${book.id}"></td>
+            <td th:text="${book.autor}"></td>
+            <td th:text="${book.title}"></td>
+            <td th:text="${book.size}"></td>
+        </tr>
+    </table>
+    <form id="filter" method="get" th:action="@{/books/remove_filter}">
+        <input type="submit" value="filter remove">
+    </form>
+    <form id="filter_ops" method="get" th:action="@{/books/filter}">
+        <input type="submit" value="filter">
+    </form>
+    <form id="filter_out" method="get" th:action="@{/books/filter_out}">
+        <input type="submit" value="filter off">
+    </form>
+</div>
+</body>
+</html>

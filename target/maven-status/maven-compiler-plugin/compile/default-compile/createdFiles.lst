@@ -1,0 +1,3 @@
+org\example\app\config\AppContextConfig.class
+org\example\WebAppInitializer.class
+org\example\web\config\WebContextConfig.class
