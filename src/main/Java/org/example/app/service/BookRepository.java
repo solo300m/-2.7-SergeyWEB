@@ -166,6 +166,20 @@ public class BookRepository implements ProjectRepository<Book> {
             }
             return count;
         }
+        else if(author.equals("") && !title.equals("") && size!=0) {
+            count = 0;
+            for (Book book : retreiveAll()) {
+                if (book.getSize() == size) {
+                    parameterSource.addValue("title",book.getTitle());
+                    parameterSource.addValue("size",book.getSize());
+                    jdbcTemplate.update("DELETE FROM books WHERE title = :title AND size = :size",parameterSource);
+                    logger.info("remove filtered book completed: " + book);
+                    //repo.remove(book);
+                    count++;
+                }
+            }
+            return count;
+        }
         return 0;
     }
 

@@ -33,7 +33,14 @@ public class FilterController {
     }
 
     @GetMapping("/data")
-    public String filterData(Model model, String author, String title, Integer size)throws BookShelfLoginException {
+    public String filterData(Model model, String author, String title, String size)throws BookShelfLoginException {
+        char[] b = size.toCharArray();
+        for(char dd: b) {
+            if (Character.isAlphabetic(dd)){
+                logger.info("\"Size\" field format must be numeric only");
+                throw new BookShelfLoginException("\"Size\" field format must be numeric only");
+            }
+        }
         String aut;
         String tit;
         int siz = 0;
@@ -48,11 +55,24 @@ public class FilterController {
         if(size == null)
             siz = 0;
         else
-            siz = size;
+            siz = Integer.parseInt(size);
         logger.info("Filtered bookshelf "+ aut +", "+ tit +", "+siz);
         if(aut.equals("") && tit.equals("") && siz == 0)
             throw new BookShelfLoginException("Filter is NULL");
             //return"redirect:/filter";
+        if(bookService.containAuthorBook(aut)==0 && tit.equals("") && siz == 0)
+            throw new BookShelfLoginException("incorrect field \"author\" ");
+        if(aut.equals("") && bookService.containTitleBook(tit)==0 && siz == 0)
+            throw new BookShelfLoginException("incorrect field \"title\" ");
+        if(aut.equals("") && tit.equals("") && bookService.containSizeBook(siz) == 0)
+            throw new BookShelfLoginException("incorrect field \"size\" ");
+
+        if(((!aut.equals("") && bookService.containAuthorBook(aut)==0) ||(!tit.equals("") && bookService.containTitleBook(tit)==0)) && siz == 0)
+            throw new BookShelfLoginException("incorrect field \"title\" and/or \"author\" ");
+        if(((!aut.equals("") && bookService.containAuthorBook(aut)==0) ||(siz != 0 && bookService.containSizeBook(siz)==0)) && tit.equals(""))
+            throw new BookShelfLoginException("incorrect field \"size\" and/or \"author\" ");
+        if(((siz != 0 && bookService.containSizeBook(siz)==0) && (tit.equals("") && bookService.containTitleBook(tit)==0)) && aut.equals(""))
+            throw new BookShelfLoginException("incorrect field \"title\" and/or \"size\" ");
         else {
             model.addAttribute("book", new Book());
             model.addAttribute("bookList", bookService.getFilteredBooks(aut, tit, siz));

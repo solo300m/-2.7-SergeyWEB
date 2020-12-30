@@ -22,6 +22,28 @@ public class BookService {
         return bookRepo.retreiveAll();
     }
 
+    public int containAuthorBook(String author){
+        List<Book> list = getAllBooks();
+        if(list.stream().filter(w->w.getAutor().equals(author)).count()!=0)
+            return 1;
+        else
+            return 0;
+    }
+    public int containTitleBook(String title){
+        List<Book> list = getAllBooks();
+        if(list.stream().filter(w->w.getTitle().equals(title)).count()!=0)
+            return 1;
+        else
+            return 0;
+    }
+    public int containSizeBook(int size){
+        List<Book> list = getAllBooks();
+        if(list.stream().filter(w->w.getSize() == size).count()!=0)
+            return 1;
+        else
+            return 0;
+    }
+
     public void filterBookOff(){
         bookRepo.filterOut();
     }
