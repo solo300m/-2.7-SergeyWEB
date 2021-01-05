@@ -1,19 +1,18 @@
 package org.example.web.controllers;
 
 import org.apache.log4j.Logger;
+import org.example.app.exception.BookShelfLoginException;
 import org.example.app.service.BookService;
 import org.example.web.dto.Book;
 import org.example.web.dto.BookIdToRemove;
+import org.example.web.dto.FileSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -23,6 +22,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
 
 @Controller
 @RequestMapping(value = "/books")
@@ -107,7 +110,7 @@ public class BookShelfController {
     }
 
     @PostMapping("/uploadFile")
-    public String uploadFile(@RequestParam("file") MultipartFile file) throws Exception{
+    public String uploadFile(@RequestParam("file") MultipartFile file) throws Exception, BookShelfLoginException{
         if (!file.isEmpty()) {
             String name = file.getOriginalFilename();
             byte[] bytes = file.getBytes();
@@ -119,30 +122,41 @@ public class BookShelfController {
             if (!dir.exists()) {
                 dir.mkdirs();
             }
+            FileSecurity fileSecurity = FileSecurity.getInstance(dir);
+
 
             //создание файла который будет сохранен на сервере
             File serverFile = new File(dir.getAbsolutePath() + File.separator + name);
             BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
             stream.write(bytes);
             stream.close();
+            fileSecurity.addFile(serverFile);
 
-            logger.info("new file save at: " + serverFile.getAbsolutePath());
+            logger.info("files in dir external_uploads: " + fileSecurity.toString());
             return "redirect:/books/shelf";
         }
         else{
             logger.info("You haven't selected a file");
-            return "redirect:/books/shelf";
+            throw new BookShelfLoginException("You haven't selected a file");
+            //return "redirect:/books/shelf";
         }
     }
 
     @PostMapping("/inloadFile")
-    public String inloadFile(@RequestParam("file") MultipartFile file) throws Exception{
+    public String inloadFile(@RequestParam("file") MultipartFile file) throws Exception, BookShelfLoginException {
+        String root = System.getProperty("catalina.home");//директория домашняя сервера TomCat
+        File dir1 = new File(root + File.separator + "external_uploads");//наименование конечной папки
+        FileSecurity fileSecurity = FileSecurity.getInstance(dir1);
         if (!file.isEmpty()) {
             String name = file.getOriginalFilename();
             byte[] bytes = file.getBytes();
 
             //create dir
-            String rootPath = "C:\\IdeaProjects\\MyWeb\\SergeyWEB\\src\\main\\Resorsies";//директория домашняя сервера TomCat
+            String rootPath = "C:\\IdeaProjects\\WEBSergey\\src\\main\\Resorsies";//директория домашняя сервера TomCat
+            //ClassLoader classLoader = getClass().getClassLoader();
+            //File file1 = new File(classLoader.getResource("C:\\IdeaProjects\\MyWeb\\SergeyWEB\\src\\main\\Resorsies\\IMG-654ee1ecffb1f0eeb96eb04c8aeae4a7-V.jpg").getFile());
+            //String root = file1.getAbsolutePath();
+            //logger.info("path root = "+root.toString());
             File dir = new File(rootPath + File.separator + "server_inloads");//наименование конечной папки
             //куда будут загружаться файлы
             if (!dir.exists()) {
@@ -151,17 +165,29 @@ public class BookShelfController {
 
             //создание файла который будет сохранен на сервере
             File serverFile = new File(dir.getAbsolutePath() + File.separator + name);
-            BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
-            stream.write(bytes);
-            stream.close();
-
-            logger.info("new file save at: " + serverFile.getAbsolutePath());
-            return "redirect:/books/shelf";
+            if(fileSecurity.containsFile(serverFile)) {
+                BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+                stream.write(bytes);
+                stream.close();
+                logger.info("new file save at: " + serverFile.getAbsolutePath());
+                return "redirect:/books/shelf";
+            }
+            else{
+                logger.info("file could not be copied");
+                throw new BookShelfLoginException("file could not be copied");
+            }
         }
         else{
             logger.info("You haven't selected a file");
-            return "redirect:/books/shelf";
+            throw new BookShelfLoginException("You haven't selected a file");
+            //return "redirect:/books/shelf";
         }
+    }
+
+    @ExceptionHandler(BookShelfLoginException.class)
+    public String handlerError(Model model, BookShelfLoginException exception){
+        model.addAttribute("errorMessage",exception.getMessage());
+        return"errors/404";
     }
 
 }
